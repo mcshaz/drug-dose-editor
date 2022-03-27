@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import * as round from './rounding'
+
 export interface IAnthro { weightKg: number; ageMonths?: number; heightCm?: number; bsa?: number; cgaWeeks?: number }
 export type primativeType = string | boolean | number | null
 
@@ -15,26 +18,32 @@ const anthroMeasures: AnthroDescription[] = [
 
 const anthroVariables = anthroMeasures.map(a => a.variable)
 
-function executeCalcs (el: ChildNode, anthro: IAnthro) {
-  for (const n of el.childNodes) {
-    if (n.nodeType === Node.TEXT_NODE) {
-      if (n.nodeValue && /\S/.test(n.nodeValue)) {
-        const unknownTerm = unknownJSTerm(n.nodeValue, anthroVariables)
-        if (unknownTerm) {
-          n.nodeValue = `{Unknown:'${unknownTerm}'}`
-        } else {
-          let p = parseAnthro(n.nodeValue, anthro)
-          if (p instanceof Error) {
-            n.nodeValue = '{Syntax Error}'
-          } else {
-            if (typeof p === 'number') p = Number(p.toPrecision(3))
-            n.nodeValue = String(p)
-          }
-        }
-      }
-    } else if (n.nodeType === Node.ELEMENT_NODE) {
-      executeCalcs(n, anthro)
-    }
+if (!(globalThis as any).round || !(globalThis as any).round.syringeVolume) {
+  (globalThis as Record<string, unknown>).round = round
+}
+
+export function replaceWithEnDash (el: DocumentFragment) {
+  const walk = document.createTreeWalker(el, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT, {
+    acceptNode: (n: Node) => ((n.nodeType === Node.ELEMENT_NODE && n.nodeName !== 'CODE') ||
+        ((n.nodeType === Node.TEXT_NODE) && /\S/.test(n.nodeValue!)))
+      ? NodeFilter.FILTER_ACCEPT
+      : NodeFilter.FILTER_REJECT
+  })
+  let n: Node | null
+  while ((n = walk.nextNode())) {
+    if (n.nodeType === Node.TEXT_NODE && n.nodeValue !== null) n.nodeValue = n.nodeValue.replace(/(\d)\s*-\s*(\d)/g, (match, p1, p2) => `${p1}–${p2}`)
+  }
+}
+
+function alterTextNodes (el: Node, transform: (textContent: string) => string) {
+  const walk = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, {
+    acceptNode: (n: Node) => (/\S/.test(n.nodeValue!))
+      ? NodeFilter.FILTER_ACCEPT
+      : NodeFilter.FILTER_REJECT
+  })
+  let n: Node | null
+  while ((n = walk.nextNode())) {
+    if (n.nodeValue !== null) n.nodeValue = transform(n.nodeValue)
   }
 }
 
@@ -42,7 +51,18 @@ function replaceCalcs (el: DocumentFragment, anthro: IAnthro) {
   for (const c of el.querySelectorAll('code')) {
     const output = document.createElement('output')
     output.append(...c.childNodes)
-    executeCalcs(output, anthro)
+    alterTextNodes(output, textContent => {
+      const unknownTerm = unknownJSTerm(textContent, anthroVariables)
+      if (unknownTerm) {
+        return `{Unknown:'${unknownTerm}'}`
+      } else {
+        const p = parseAnthro(textContent, anthro)
+        if (p instanceof Error) {
+          return '{Syntax Error}'
+        }
+        return String(p)
+      }
+    })
     if (c.parentElement) c.parentElement.replaceChild(output, c)
   }
 }
@@ -56,7 +76,7 @@ const allowedFunctions = ['.toFixed', '.toPrecision', 'parseInt', 'parseFloat', 
 function unknownJSTerm (expression: string, variables: string[]) {
   const isBuiltIn = (builtInName: string, command: string) =>
     command.startsWith(builtInName + '.') &&
-    Object.prototype.hasOwnProperty.call(window[builtInName as never], command.substring(builtInName.length + 1))
+    Object.prototype.hasOwnProperty.call(globalThis[builtInName as never], command.substring(builtInName.length + 1))
   // remove string template strings but leave any code the interpreter will deal with
   expression = expression.replace(/[`}](?:(?=(\\?))\1.)*?(`|\${)/g, ' ')
   // remove text in single and double quotes
@@ -66,6 +86,7 @@ function unknownJSTerm (expression: string, variables: string[]) {
         m = m.substring(0, m.length - 1).trimEnd()
         if (!isBuiltIn('Math', m) &&
           !isBuiltIn('Number', m) &&
+          !isBuiltIn('round', m) &&
           !allowedFunctions.includes(m)) return m
       } else if (!allowedInstructions.includes(m) && !variables.includes(m)) {
         return m
@@ -94,6 +115,7 @@ function parseExpression<T> (sanitizedExpression: string, obj: T, keys: Array<st
     return f() as primativeType
   }
   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   try {
     // note destructuring object assignment not compatible with ie11
     // eslint-disable-next-line no-new-func

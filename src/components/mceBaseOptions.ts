@@ -92,5 +92,6 @@ export const mceBaseOptions = {
   fontsize_formats: '8pt 9pt 10pt 11pt 12pt 14pt 16pt',
   content_css: 'bolus_drugs.css',
   forced_root_block: 'div',
-  toolbar_location: 'bottom'
+  toolbar_location: 'bottom',
+  valid_children: '-code[*]'
 }

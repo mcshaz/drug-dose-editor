@@ -1,17 +1,17 @@
 <div>
-  <span class="diluted-ml"><code>x</code>mL administered (over y mins)</span>
+  <span class="diluted-ml"><code>round.toSyringeVolume(weightKg*0.1)*2</code>mL administered (over y mins)</span>
 </div>
 <div>
   <span class="dilution-method">of 
-    <code>z</code>mL drug diluted in
-    <code>a</code>mL of [diluent]
+    <code>round.toNearest(weightKg*0.4, 0.5)</code>mL drug diluted in
+    <code>round.toPrecision(100-weightKg*0.4, 2)</code>mL of [diluent]
   </span>
 </div>
 <div>or</div>
 <div>
   <span class="neat">Neat</span>
   <span class="neat-ml">
-    <code>b</code>
+    <code>weightKg*0.2</code>
     mL
   </span>
 </div>

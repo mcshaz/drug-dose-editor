@@ -2,13 +2,14 @@
   <div>
     <div class="input-group">
       <span class="input-group-text">{{ min }}</span>
-      <div class="form-floating flex-grow-1 mb-4">
+      <div class="form-control">
         <label
+          class="range-label"
           :for="id"
         >{{ label }}:{{ value }}</label>
         <input
           type="range"
-          class="form-range"
+          class="form-range mt-3"
           :id="id"
           :value="value"
           @input="onInput"
@@ -17,14 +18,14 @@
           :max="max"
           :step="step"
         >
-      </div><!--form-floating-->
+      </div>
       <span class="input-group-text">{{ max }}</span>
     </div><!--input-group-->
   </div>
 </template>
 <script setup lang="ts">
-import uniqueId from 'lodash.uniqueid'
-import { computed, ref, watchEffect } from 'vue'
+import { createUniqueId } from '@/services/uniqueIdFactory'
+import { ref, watchEffect } from 'vue'
 
 interface Props {
   modelValue: number;
@@ -53,6 +54,20 @@ const onInput = (evt: Event) => {
 
 watchEffect(() => { value.value = props.modelValue })
 
-const id = computed(() => uniqueId(props.label.replaceAll(/\s/g, '-')))
+const id = createUniqueId(props)
 
 </script>
+<style>
+label.range-label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  padding: 1rem 0.75rem;
+  pointer-events: none;
+  border: 1px solid transparent;
+  transform-origin: 0 0;
+  transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+  opacity: 0.65;
+}
+</style>

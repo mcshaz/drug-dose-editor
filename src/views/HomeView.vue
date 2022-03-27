@@ -1,12 +1,10 @@
 <template>
-  <div class="home container-fluid">
-    <DrugFormulaEditor />
-  </div>
+  <DrugFormulaEditor />
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import DrugFormulaEditor from '@/components/DrugFormulaEditor.vue'
+import DrugFormulaEditor from '@/views/EditBolusRows.vue'
 
 export default defineComponent({
   name: 'HomeView',
