@@ -25,7 +25,7 @@
         <span class="drug-name">Drug name</span>. Only the predefined formats relevant
         to each column of the table are available in each cell. For example you cannot select
         the 'Drug name' format in the second column, but you can select the
-        <span class="dilution-method">
+        <span class="dilution">
           Dilution method
         </span> format in the second column.
       </p>

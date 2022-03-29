@@ -22,7 +22,7 @@ interface Props {
 const props = defineProps<Props>()
 
 const emit = defineEmits<{(e: 'update:modelValue', value: string): void
-  (e: 'update:selectedIndex', value: number): void
+  // (e: 'update:selectedIndex', value: number): void
 }>()
 
 const value = useModelWrapper(props, emit)

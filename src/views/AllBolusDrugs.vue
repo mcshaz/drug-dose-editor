@@ -6,7 +6,7 @@
           <th scope="col">
             Drug
             <button
-              class="ms-2 pe-3 btn btn-primary"
+              class="ms-1 pe-4 pt-3 btn btn-primary"
               @click="createDrug"
               title="Create drug"
             >
@@ -42,7 +42,7 @@
         >
           <tr
             v-for="(i, iindx) of d"
-            :key="i.drugName + i.department + i.indication"
+            :key="i.uuid || (i.drugName + i.department + i.indication)"
           >
             <th
               v-if="iindx===0"
@@ -99,7 +99,7 @@
         <div v-if="form">
           <div class="mb-3">
             <BInput
-              v-model="form.drugName"
+              v-model="capitalisedDrug"
               label="Drug Name"
             />
           </div>
@@ -137,7 +137,8 @@ import BAutocomplete from '@/components/BAutocomplete.vue'
 import BModal from '@/components/BModal.vue'
 import BInput from '@/components/BInput.vue'
 import BSelect from '@/components/BSelect.vue'
-import { computed, ref } from 'vue'
+import { computed, Ref, ref, triggerRef } from 'vue'
+import type { WritableComputedRef } from 'vue'
 import { NewBolusDrug } from '@/services/NewBolusDrug'
 import router from '@/router'
 import { useAsyncState } from '@vueuse/core'
@@ -176,6 +177,17 @@ const createDrug = () => {
   displayModal.value = true
 }
 
+const capitalisedDrug = computed({
+  get: () => form.value?.drugName || '',
+  set: (value: string) => {
+    if (form.value) {
+      form.value.drugName = value
+        ? value[0].toUpperCase() + value.substring(1).toLowerCase()
+        : value
+    }
+  }
+})
+
 const editDrug = (bd: BolusDrug) => {
   form.value = bd
   displayModal.value = true
@@ -184,6 +196,13 @@ const editDrug = (bd: BolusDrug) => {
 const removeIndication = async (bd: BolusDrug) => {
   if (bd.uuid) {
     await BolusDrugDb.instance.bolusDrugs.delete(bd.uuid)
+    const container = bolusDrugs.value[bd.drugName]
+    if (container.length === 1) {
+      delete bolusDrugs.value[bd.drugName]
+    } else {
+      bolusDrugs.value[bd.drugName] = container.filter(c => c !== bd)
+    }
+    triggerRef(bolusDrugs)
   }
 }
 

@@ -1,19 +1,10 @@
 <template>
-  <section class="container">
+  <div class="container">
     <div
       v-if="isLoading"
       class="alert alert-info"
     >
       Please wait - loading...
-    </div>
-    <div
-      v-else-if="error && error instanceof Error"
-      class="alert alert-error"
-    >
-      Sorry there seems to have been a problem
-      <blockquote>
-        {{ error.message }}
-      </blockquote>
     </div>
     <div v-else-if="drugInfo">
       <div class="row">
@@ -46,7 +37,7 @@
         </div><!--end:col-->
       </div><!--end:row-->
       <div
-        class="row gx-0"
+        class="row"
         v-for="(row, indx) of drugInfo.rows"
         :key="indx"
       >
@@ -62,7 +53,7 @@
           </div>
         <!--end:form-floating-->
         </div>
-        <div class="col-lg-5">
+        <div class="col-lg-4">
           <BolusDrugEditor
             v-model="row.drugDetails"
             body-class="text-right"
@@ -76,13 +67,13 @@
             ]"
           />
         </div>
-        <div class="col-lg-5">
+        <div class="col-lg-6">
           <BolusDrugEditor
             v-model="row.administer"
             body-class="text-center"
             :formats="[
               'diluted-ml',
-              'dilution-method',
+              'dilution',
               'neat',
               'neat-ml',
               'arrow-right',
@@ -93,7 +84,7 @@
           <BolusDrugEditor
             v-model="row.calculations"
             body-class="text-left"
-            :formats="['dose-calculation', 'calculated-dose']"
+            :formats="['dose-calc', 'final-dose']"
           />
         </div>
         <div class="col-lg-12">
@@ -133,14 +124,14 @@
         </div>
       </div>
     </div>
-  </section>
-  <button
-    @click="saveDrug"
-    class="btn btn-primary py-3"
-  >
-    Save
-    <font-awesome-icon icon="floppy-disk" />
-  </button>
+    <button
+      @click="saveDrug"
+      class="btn btn-primary py-3"
+    >
+      Save
+      <font-awesome-icon icon="floppy-disk" />
+    </button>
+  </div>
 </template>
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue'
@@ -158,7 +149,7 @@ import router from '@/router'
 import { useAsyncState } from '@vueuse/core'
 
 const bolusDrugId = useRoute().params.id
-const { isLoading, state, error } = useAsyncState(() => {
+const { isLoading, state } = useAsyncState(() => {
   if (!bolusDrugId) {
     router.push({ name: 'NotFound' })
     throw new Error('no drug Id provided in route')

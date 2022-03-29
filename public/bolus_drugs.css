@@ -35,7 +35,7 @@ body {
   font-size: 11pt;
   font-style: italic;
 }
-small.drug-note {
+.drug-note {
   font-size: 10pt;
   color: #555; 
 }
@@ -50,7 +50,7 @@ small.drug-note {
 .diluted-ml::before {
   content: '= ';
 }
-.dilution-method {
+.dilution {
   font-size: 11pt;
 }
 .neat-ml {
@@ -72,13 +72,13 @@ small.drug-note {
   border-left: 10px solid #000;
   border-bottom: 5px solid transparent;
 }
-.dose-calculation {
+.dose-calc {
   font-size: 9pt;
 }
-.calculated-dose {
+.final-dose {
   font-size: 9pt;
   font-weight: bold;
 }
-.calculated-dose::before {
+.final-dose::before {
   content: '=';
 }
