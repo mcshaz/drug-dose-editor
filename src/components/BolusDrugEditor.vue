@@ -117,7 +117,7 @@
 </template>
 
 <script setup lang="ts">
-import { paragraphDiv } from '@/services/custom-tiptap'
+import { arrowRight, paragraphDiv } from '@/services/custom-tiptap'
 import { useEditor, EditorContent } from '@tiptap/vue-3'
 import { Document } from '@tiptap/extension-document'
 import { Text } from '@tiptap/extension-text'
@@ -157,6 +157,7 @@ const editor = useEditor({
     paragraphDiv,
     Text,
     myCode,
+    arrowRight,
     TextClass,
     History
   ],
@@ -170,12 +171,16 @@ const editor = useEditor({
   }
 })
 
-const currentStyle = computed(() => props.formats.find(f => editor.value?.isActive('textClass', { class: f })))
+const currentStyle = computed(() => props.formats.find(f => editor.value?.isActive('superscript') || editor.value?.isActive('textClass', { class: f })))
 
 const isCodeActive = computed(() => editor.value?.isActive('code'))
 
 const selectStyle = (f: FormatInfo) => {
-  editor.value!.chain().focus().setClass(f.className).run()
+  if (f.className === 'arrow-right') {
+    editor.value!.chain().focus().setSuperscript().run()
+  } else {
+    editor.value!.chain().focus().setClass(f.className).run()
+  }
 }
 
 </script>

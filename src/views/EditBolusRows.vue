@@ -1,139 +1,137 @@
 <template>
-  <div class="container">
+  <div
+    v-if="isLoading"
+    class="alert alert-info"
+  >
+    Please wait - loading...
+  </div>
+  <div v-else-if="drugInfo">
+    <div class="row">
+      <h3 class="col">
+        {{ drugInfo.drugName }}
+        <small>
+          for {{ drugInfo.indication }}
+        </small>
+        <small class="text-muted">
+          (as used by {{ drugInfo.department }})
+        </small>
+      </h3>
+    </div><!--end:row-->
+    <div class="row">
+      <div class="d-grid gap-2 col-4 mx-auto">
+        <button
+          class="btn btn-info mb-3"
+          @click="showHelp=true"
+        >
+          <font-awesome-icon icon="circle-info" />
+          Using this editor
+        </button>
+        <BModal
+          v-model="showHelp"
+          title="Using the editor"
+          size="xl"
+        >
+          <EditorHelp />
+        </BModal>
+      </div><!--end:col-->
+    </div><!--end:row-->
     <div
-      v-if="isLoading"
-      class="alert alert-info"
+      class="row"
+      v-for="(row, indx) of drugInfo.rows"
+      :key="row.logicalSelector || indx"
     >
-      Please wait - loading...
+      <hr>
+      <div class="col-lg-12">
+        <div class="form-floating flex-grow-1 mb-3">
+          <input
+            class="form-control"
+            id="new-drugInfo-name"
+            v-model.trim="row.logicalSelector"
+          >
+          <label for="new-drugInfo-name">Logical Selector</label>
+        </div>
+        <!--end:form-floating-->
+      </div>
+      <div class="col-lg-3">
+        <BolusDrugEditor
+          v-model="row.drugDetails"
+          body-class="text-right"
+          :formats="[
+            'drug-name',
+            'concentration',
+            'route',
+            'route-emphasis',
+            'drug-note',
+            'diluent-fluid',
+          ]"
+        />
+      </div>
+      <div class="col-lg-6">
+        <BolusDrugEditor
+          v-model="row.administer"
+          body-class="text-center"
+          :include-code="true"
+          :formats="[
+            'diluted-ml',
+            'dilution',
+            'neat',
+            'neat-ml',
+            'arrow-right',
+          ]"
+        />
+      </div>
+      <div class="col-lg-3">
+        <BolusDrugEditor
+          v-model="row.calculations"
+          body-class="text-left"
+          :include-code="true"
+          :formats="['dose-calc', 'final-dose']"
+        />
+      </div>
+      <div class="col-lg-12">
+        <button
+          class="btn btn-secondary m-3"
+          @click="clone(row)"
+        >
+          Clone
+          <font-awesome-icon icon="clone" />
+        </button>
+        <button
+          class="btn btn-warning"
+          @click="del(indx)"
+        >
+          <font-awesome-icon icon="trash-can" />
+        </button>
+      </div>
     </div>
-    <div v-else-if="drugInfo">
-      <div class="row">
-        <h3 class="col">
-          {{ drugInfo.drugName }}
-          <small>
-            for {{ drugInfo.indication }}
-          </small>
-          <small class="text-muted">
-            (as used by {{ drugInfo.department }})
-          </small>
-        </h3>
-      </div><!--end:row-->
-      <div class="row">
-        <div class="d-grid gap-2 col-4 mx-auto">
-          <button
-            class="btn btn-info mb-3"
-            @click="showHelp=true"
-          >
-            <font-awesome-icon icon="circle-info" />
-            Using this editor
-          </button>
-          <BModal
-            v-model="showHelp"
-            title="Using the editor"
-            size="xl"
-          >
-            <EditorHelp />
-          </BModal>
-        </div><!--end:col-->
-      </div><!--end:row-->
+    <div class="row">
+      <h3 class="col-lg-12">
+        Examples
+      </h3>
       <div
-        class="row"
-        v-for="(row, indx) of drugInfo.rows"
-        :key="indx"
+        class="col-lg-12"
+        v-for="(t, indx) in testWeights"
+        :key="t.weightKg"
       >
         <hr>
-        <div class="col-lg-12">
-          <div class="form-floating flex-grow-1 mb-3">
-            <input
-              class="form-control"
-              id="new-drugInfo-name"
-              v-model.trim="row.logicalSelector"
-            >
-            <label for="new-drugInfo-name">Logical Selector</label>
-          </div>
-        <!--end:form-floating-->
-        </div>
-        <div class="col-lg-3">
-          <BolusDrugEditor
-            v-model="row.drugDetails"
-            body-class="text-right"
-            :formats="[
-              'drug-name',
-              'concentration',
-              'route',
-              'route-emphasis',
-              'drug-note',
-              'diluent-fluid',
-            ]"
-          />
-        </div>
-        <div class="col-lg-6">
-          <BolusDrugEditor
-            v-model="row.administer"
-            body-class="text-center"
-            :include-code="true"
-            :formats="[
-              'diluted-ml',
-              'dilution',
-              'neat',
-              'neat-ml',
-              'arrow-right',
-            ]"
-          />
-        </div>
-        <div class="col-lg-3">
-          <BolusDrugEditor
-            v-model="row.calculations"
-            body-class="text-left"
-            :include-code="true"
-            :formats="['dose-calc', 'final-dose']"
-          />
-        </div>
-        <div class="col-lg-12">
-          <button
-            class="btn btn-secondary m-3"
-            @click="clone(row)"
-          >
-            Clone
-            <font-awesome-icon icon="clone" />
-          </button>
-          <button
-            class="btn btn-warning"
-            @click="del(indx)"
-          >
-            <font-awesome-icon icon="trash-can" />
-          </button>
-        </div>
-      </div>
-      <div class="row">
-        <h3 class="col-lg-12">
-          Examples
-        </h3>
-        <div
-          class="col-lg-12"
-          v-for="(t, indx) in testWeights"
-          :key="t.weightKg"
-        >
-          <hr>
-          <SelectExampleWeight v-model="t.weightKg" />
-          <BolusDrugWeightExample
-            v-if="examples[indx]"
-            :weight="t.weightKg"
-            :drug-details="examples[indx]?.drugDetails"
-            :administer="examples[indx]?.administer"
-            :calculations="examples[indx]?.calculations"
-          />
-        </div>
+        <SelectExampleWeight v-model="t.weightKg" />
+        <BolusDrugWeightExample
+          v-if="examples[indx]"
+          :weight="t.weightKg"
+          :drug-details="examples[indx]?.drugDetails"
+          :administer="examples[indx]?.administer"
+          :calculations="examples[indx]?.calculations"
+        />
       </div>
     </div>
-    <button
-      @click="saveDrug"
-      class="btn btn-primary py-3"
-    >
-      Save
-      <font-awesome-icon icon="floppy-disk" />
-    </button>
   </div>
+  <button
+    @click="saveDrug"
+    class="btn btn-primary py-3"
+  >
+    Save
+    <font-awesome-icon icon="floppy-disk" />
+  </button>
 </template>
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue'
@@ -194,7 +192,10 @@ const clone = (item: AdministerDetail) => {
 }
 
 const del = (index: number) => {
-  drugInfo.value?.rows.splice(index, 1)
+  console.log(index)
+  if (drugInfo.value) {
+    drugInfo.value?.rows.splice(index, 1)
+  }
 }
 
 const saveDrug = () => {

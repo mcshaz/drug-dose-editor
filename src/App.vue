@@ -1,12 +1,19 @@
 <template>
-  <main>
+  <div class="container">
     <nav>
       <router-link to="/">
         Home
       </router-link>
     </nav>
+  </div>
+  <main class="container">
     <router-view />
   </main>
+  <footer class="m-3">
+    <p>
+      Example drug editor built by <a href="mailto:brent@focused-light.net">Mcshaz</a>
+    </p>
+  </footer>
 </template>
 
 <style>

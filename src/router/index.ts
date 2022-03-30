@@ -1,7 +1,7 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
 import AllBolusDrugs from '@/views/AllBolusDrugs.vue'
 import EditBolusRows from '@/views/EditBolusRows.vue'
-import ErrorPage from '@/views/ErrorPage.vue'
+import NotFound from '@/views/NotFound.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -19,9 +19,9 @@ const routes: Array<RouteRecordRaw> = [
     // component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
   },
   {
-    path: '/error',
-    name: 'error',
-    component: ErrorPage
+    path: '/:pathMatch(.*)*',
+    name: 'NotFound',
+    component: NotFound
   }
 ]
 

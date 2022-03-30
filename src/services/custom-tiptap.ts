@@ -18,8 +18,8 @@ export const paragraphDiv = Paragraph.extend({
 })
 
 export const arrowRight = Superscript.extend({
-  name: 'arrow-right',
-  content: 'text*'
+  spanning: false,
+  excludes: '_'
 }).configure({
   HTMLAttributes: {
     class: 'arrow-right'

@@ -29,6 +29,16 @@ Dexie.getDatabaseNames().then(names => {
     })
   })
 })
+
+BolusDrugDb.instance.bolusDrugs.toArray().then(a => a.forEach(bd => {
+  bd.rows.forEach(r => {
+    r.drugDetails = r.drugDetails.replaceAll('<small', '<span').replaceAll('</small', '</span')
+    r.administer = r.administer.replaceAll('<span class="dilution-method', '<span class="dilution')
+    r.calculations = r.calculations.replaceAll('<span class="dose-calculation', '<span class="dose-calc')
+      .replaceAll('<span class="calculated-dose', '<span class="final-dose')
+  })
+  BolusDrugDb.instance.bolusDrugs.put(bd)
+}))
 */
 export class BolusDrugDb extends Dexie {
   // Declare implicit table properties.

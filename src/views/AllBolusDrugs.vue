@@ -1,99 +1,98 @@
 <template>
-  <div class="container">
-    <table class="table">
-      <thead>
-        <tr>
-          <th scope="col">
-            Drug
-            <button
-              class="ms-1 pe-4 pt-3 btn btn-primary"
-              @click="createDrug"
-              title="Create drug"
-            >
-              <font-awesome-layers class="fa-lg">
-                <font-awesome-icon icon="prescription" />
-                <font-awesome-icon
-                  icon="plus"
-                  transform="up-7 right-12"
-                />
-              </font-awesome-layers>
-            </button>
-          </th>
-          <th scope="col">
-            Indication
-          </th>
-          <th scope="col">
-            Department
-          </th>
-          <td />
-        </tr>
-      </thead>
-      <tbody>
-        <template v-if="isLoading">
-          <tr>
-            <td colspan="4">
-              Loading...
-            </td>
-          </tr>
-        </template>
-        <template
-          v-else
-          v-for="d in bolusDrugs"
-        >
-          <tr
-            v-for="(i, iindx) of d"
-            :key="i.uuid || (i.drugName + i.department + i.indication)"
+  <table class="table">
+    <thead>
+      <tr>
+        <th scope="col">
+          Drug
+          <button
+            class="ms-1 pe-4 pt-3 btn btn-primary"
+            @click="createDrug"
+            title="Create drug"
           >
-            <th
-              v-if="iindx===0"
-              scope="row"
-              :rowspan="d.length"
+            <font-awesome-layers class="fa-lg">
+              <font-awesome-icon icon="prescription" />
+              <font-awesome-icon
+                icon="plus"
+                transform="up-7 right-12"
+              />
+            </font-awesome-layers>
+          </button>
+        </th>
+        <th scope="col">
+          Indication
+        </th>
+        <th scope="col">
+          Department
+        </th>
+        <td />
+      </tr>
+    </thead>
+    <tbody>
+      <template v-if="isLoading">
+        <tr>
+          <td colspan="4">
+            Loading...
+          </td>
+        </tr>
+      </template>
+      <template
+        v-else
+        v-for="d in bolusDrugs"
+      >
+        <tr
+          v-for="(i, iindx) of d"
+          :key="i.uuid || (i.drugName + i.department + i.indication)"
+        >
+          <th
+            v-if="iindx===0"
+            scope="row"
+            :rowspan="d.length"
+          >
+            {{ i.drugName }}
+          </th>
+          <td>
+            {{ i.indication }}
+          </td>
+          <td>
+            {{ i.department }}
+          </td>
+          <td>
+            <button
+              class="btn btn-secondary"
+              @click="editDrug(i)"
+              title="Edit name"
             >
-              {{ i.drugName }}
-            </th>
-            <td>
-              {{ i.indication }}
-            </td>
-            <td>
-              {{ i.department }}
-            </td>
-            <td>
-              <button
-                class="btn btn-secondary"
-                @click="editDrug(i)"
-                title="Edit name"
-              >
-                <font-awesome-icon icon="pen-to-square" />
-              </button>
-              <button
-                class="ms-2 btn btn-warning"
-                @click="removeIndication(i)"
-                title="Delete"
-              >
-                <font-awesome-icon icon="trash-can" />
-              </button>
-              <button
-                class="ms-2 btn btn-info"
-                @click="editRows(i)"
-                title="Go to calculations"
-              >
-                <font-awesome-icon icon="calculator" />
-                <font-awesome-icon
-                  icon="bars"
-                  class="ms-1"
-                />
-              </button>
-            </td>
-          </tr>
-        </template>
-      </tbody>
-    </table>
-  </div>
+              <font-awesome-icon icon="pen-to-square" />
+            </button>
+            <button
+              class="ms-2 btn btn-warning"
+              @click="checkRemoveIndication(i)"
+              title="Delete"
+            >
+              <font-awesome-icon icon="trash-can" />
+            </button>
+            <button
+              class="ms-2 btn btn-info"
+              @click="editRows(i)"
+              title="Go to calculations"
+            >
+              <font-awesome-icon icon="calculator" />
+              <font-awesome-icon
+                icon="bars"
+                class="ms-1"
+              />
+            </button>
+          </td>
+        </tr>
+      </template>
+    </tbody>
+  </table>
   <form
     @submit.prevent="submitDrug"
   >
     <BModal
-      v-model="displayModal"
+      v-model="displayNewDrugForm"
+      title="Create Drug Dosing"
     >
       <template #default>
         <div v-if="form">
@@ -130,6 +129,25 @@
       </template>
     </BModal>
   </form>
+  <BModal
+    v-model="displaySureDelete"
+    title="Are You Sure?"
+  >
+    <template #default>
+      Do you really want to delete
+      {{ form?.drugName }} for {{ form?.indication }}
+      used by {{ form?.department }}?
+    </template>
+    <template #buttons>
+      <button
+        class="ms-2 btn btn-warning"
+        @click="removeIndication()"
+        type="button"
+      >
+        Yes delete!
+      </button>
+    </template>
+  </BModal>
 </template>
 <script setup lang="ts">
 import { BolusDrug, BolusDrugDb } from '@/services/BolusDb'
@@ -153,7 +171,8 @@ const isLoading = computed(() => dptsLoading.value || drugsLoading.value)
 
 const indications = ['Cardiac Arrest', 'Intubation', 'Shock', 'Asthma', 'Epilepsy', 'Arrhythmia', 'Meningo-encephalitis', 'Seizures', 'Sedation']
 
-const displayModal = ref(false)
+const displayNewDrugForm = ref(false)
+const displaySureDelete = ref(false)
 
 const form = ref<{
   uuid?: string;
@@ -167,7 +186,7 @@ const createDrug = () => {
     indication: '',
     department: dpts.value[0].text
   }
-  displayModal.value = true
+  displayNewDrugForm.value = true
 }
 
 const capitalisedDrug = computed({
@@ -183,20 +202,27 @@ const capitalisedDrug = computed({
 
 const editDrug = (bd: BolusDrug) => {
   form.value = bd
-  displayModal.value = true
+  displayNewDrugForm.value = true
 }
 
-const removeIndication = async (bd: BolusDrug) => {
-  if (bd.uuid) {
-    await BolusDrugDb.instance.bolusDrugs.delete(bd.uuid)
-    const container = bolusDrugs.value[bd.drugName]
-    if (container.length === 1) {
-      delete bolusDrugs.value[bd.drugName]
-    } else {
-      bolusDrugs.value[bd.drugName] = container.filter(c => c !== bd)
-    }
-    triggerRef(bolusDrugs)
+const checkRemoveIndication = (bd: BolusDrug) => {
+  form.value = bd
+  displaySureDelete.value = true
+}
+
+const removeIndication = async () => {
+  if (!form.value) throw new Error('Shouldn\'t be able to delete without a form value')
+  if (form.value.uuid) {
+    await BolusDrugDb.instance.bolusDrugs.delete(form.value.uuid)
   }
+  const container = bolusDrugs.value[form.value.drugName]
+  if (container.length === 1) {
+    delete bolusDrugs.value[form.value.drugName]
+  } else {
+    bolusDrugs.value[form.value.drugName] = container.filter(c => !(c.uuid === form.value!.uuid && c.department === form.value!.department && c.indication === form.value!.indication))
+  }
+  triggerRef(bolusDrugs)
+  displaySureDelete.value = false
 }
 
 const editRows = (bd: BolusDrug) => {
