@@ -1,4 +1,4 @@
-import execa from 'execa'
+import { execa } from 'execa'
 import rimraf from 'rimraf'
 import { promisify } from 'util';
 
