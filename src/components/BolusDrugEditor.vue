@@ -182,5 +182,11 @@ const selectStyle = (f: FormatInfo) => {
     editor.value!.chain().focus().setClass(f.className).run()
   }
 }
-
 </script>
+<style>
+.ProseMirror {
+  min-height: 6.1em;
+  border:lightgray 1px dotted;
+  padding: 0 0.5em;
+}
+</style>
