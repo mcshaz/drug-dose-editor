@@ -53,7 +53,7 @@
           </div>
         <!--end:form-floating-->
         </div>
-        <div class="col-lg-4">
+        <div class="col-lg-3">
           <BolusDrugEditor
             v-model="row.drugDetails"
             body-class="text-right"
@@ -71,6 +71,7 @@
           <BolusDrugEditor
             v-model="row.administer"
             body-class="text-center"
+            :include-code="true"
             :formats="[
               'diluted-ml',
               'dilution',
@@ -80,10 +81,11 @@
             ]"
           />
         </div>
-        <div class="col-lg-2">
+        <div class="col-lg-3">
           <BolusDrugEditor
             v-model="row.calculations"
             body-class="text-left"
+            :include-code="true"
             :formats="['dose-calc', 'final-dose']"
           />
         </div>

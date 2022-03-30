@@ -137,21 +137,14 @@ import BAutocomplete from '@/components/BAutocomplete.vue'
 import BModal from '@/components/BModal.vue'
 import BInput from '@/components/BInput.vue'
 import BSelect from '@/components/BSelect.vue'
-import { computed, Ref, ref, triggerRef } from 'vue'
-import type { WritableComputedRef } from 'vue'
+import { computed, ref, triggerRef } from 'vue'
 import { NewBolusDrug } from '@/services/NewBolusDrug'
 import router from '@/router'
 import { useAsyncState } from '@vueuse/core'
+import { orderedLookup } from '@/services/orderedLookup'
 
 const { state: bolusDrugs, isLoading: drugsLoading } = useAsyncState(async () =>
-  (await BolusDrugDb.instance.bolusDrugs.toArray()).reduce((accum, bd) => {
-    if (accum[bd.drugName]) {
-      accum[bd.drugName].push(bd)
-    } else {
-      accum[bd.drugName] = [bd]
-    }
-    return accum
-  }, {} as {[indx: string]: BolusDrug[]}), { '': [] })
+  orderedLookup(await BolusDrugDb.instance.bolusDrugs.toArray(), b => b.drugName), { '': [] })
 const { state: dpts, isLoading: dptsLoading } = useAsyncState(async () =>
   (await BolusDrugDb.instance.departments.toArray()).map(d => ({ value: d.name, text: d.name }))
 , [])

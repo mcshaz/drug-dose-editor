@@ -1,24 +1,96 @@
 <template>
   <div v-if="editor">
+    <EditorContent
+      :editor="editor"
+    />
     <ul class="nav nav-pills">
       <li class="nav-item">
         <button
+          v-if="includeCode"
           @click="editor!.chain().focus().toggleCode().run()"
-          :class="{ 'is-active active': editor.isActive('code') }"
-          class="nav-link btn-sm"
+          :class="{ 'is-active active': isCodeActive }"
+          class="nav-link"
           title="add formula"
         >
-          {x+y}
+          𝑓(𝑥)
         </button>
+      </li>
+      <li
+        v-if="includeCode"
+        class="nav-item dropdown"
+      >
+        <button
+          :disabled="!isCodeActive"
+          class="nav-link dropdown-toggle"
+          :class="isCodeActive ? '' : 'disabled'"
+          data-bs-toggle="dropdown"
+          role="button"
+          aria-expanded="false"
+        >
+          <font-awesome-icon icon="weight-scale" />
+        </button>
+        <ul class="dropdown-menu">
+          <li>
+            <button
+              class="dropdown-item"
+              @click="editor?.commands.insertContent('weightKg')"
+              type="button"
+            >
+              Weight <small>(kg)</small>
+            </button>
+          </li>
+          <li>
+            <button
+              class="dropdown-item"
+              @click="editor?.commands.insertContent('bsa')"
+              type="button"
+              title="Body surface area in square metres"
+            >
+              BSA <small>(m²)</small>
+            </button>
+          </li>
+          <li><hr class="dropdown-divider"></li>
+          <li>
+            <button
+              class="dropdown-item"
+              @click="editor?.commands.insertContent('ageYears')"
+              type="button"
+              title="Age in years"
+            >
+              Age <small>(years)</small>
+            </button>
+          </li>
+          <li>
+            <button
+              class="dropdown-item"
+              @click="editor?.commands.insertContent('ageDays')"
+              type="button"
+              title="Age in days"
+            >
+              Age <small>(days)</small>
+            </button>
+          </li>
+          <li>
+            <button
+              class="dropdown-item"
+              @click="editor?.commands.insertContent('cga')"
+              type="button"
+              title="Corrected gestational age in weeks"
+            >
+              CGA <small>(weeks)</small>
+            </button>
+          </li>
+        </ul>
       </li>
       <li class="nav-item dropdown">
         <button
           class="nav-link dropdown-toggle"
-          data-bs-toggle="dropdown btn-sm"
+          data-bs-toggle="dropdown"
           role="button"
           aria-expanded="false"
         >
-          {{ currentStyle || 'Style' }}
+          {{ currentStyle || '[Style]' }}
+          <!--possibly font-awesome pen-nib-->
         </button>
         <ul class="dropdown-menu">
           <li>
@@ -38,9 +110,6 @@
         </ul>
       </li>
     </ul>
-    <EditorContent
-      :editor="editor"
-    />
   </div>
   <div v-else>
     Loading...
@@ -55,6 +124,7 @@ import { Text } from '@tiptap/extension-text'
 import { computed } from 'vue'
 import { myCode } from '@/services/tiptap/myCode'
 import { TextClass } from '@/services/tiptap/text-class'
+import { History } from '@tiptap/extension-history'
 
 export type drugFormats = 'drug-name' | 'concentration' | 'route' | 'route-emphasis' | 'drug-note' | 'diluent-fluid'
   | 'diluted-ml' | 'dilution' | 'neat' | 'neat-ml' | 'arrow-right' | 'dose-calc' | 'final-dose'
@@ -64,6 +134,7 @@ interface Props {
   modelValue: string | null;
   formats: drugFormats[];
   bodyClass: bodyClasses;
+  includeCode?: boolean;
 }
 const props = defineProps<Props>()
 const emit = defineEmits<{(e: 'update:modelValue', value: string | null): void}>()
@@ -86,7 +157,8 @@ const editor = useEditor({
     paragraphDiv,
     Text,
     myCode,
-    TextClass
+    TextClass,
+    History
   ],
   content: props.modelValue,
   onUpdate: ({ editor }) => {
@@ -99,6 +171,8 @@ const editor = useEditor({
 })
 
 const currentStyle = computed(() => props.formats.find(f => editor.value?.isActive('textClass', { class: f })))
+
+const isCodeActive = computed(() => editor.value?.isActive('code'))
 
 const selectStyle = (f: FormatInfo) => {
   editor.value!.chain().focus().setClass(f.className).run()
