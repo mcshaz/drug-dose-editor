@@ -102,7 +102,16 @@
               @click="selectStyle(f)"
               type="button"
             >
-              <span :class="f.className">
+              <sup
+                class="arrow-right"
+                v-if="f.className==='arrow-right'"
+              >
+                {{ f.displayName }}
+              </sup>
+              <span
+                v-else
+                :class="f.className"
+              >
                 {{ f.displayName }}
               </span>
             </button>
